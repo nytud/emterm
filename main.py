@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-    author: Ágnes Kalivoda
-    last update: 2019.10.25.
+    author: Ágnes Kalivoda, Noémi Vadász
+    last update: 2019.11.28.
 
 """
 
@@ -22,6 +22,7 @@ def get_termdict(path):
     """
 
     termdict = {}
+    maxlen = 0
 
     with open(path, encoding='utf-8') as fr:
         for line in fr:
@@ -31,8 +32,11 @@ def get_termdict(path):
             if term not in termdict.keys():
                 termdict[term] = []
             termdict[term].append(uid)
+            actlen = len(term.split('@'))
+            if maxlen < actlen:
+                maxlen = actlen
 
-    return termdict
+    return termdict, maxlen
 
 
 def canonical(ls):
@@ -63,12 +67,12 @@ def add_annotation(act_sent, i, r, hit_counter, ctoken, termdict):
     if '@' in ctoken:
         for x, token in enumerate(act_sent):
             if x > i and x < r:
-                act_sent[i][1] += '{};'.format(hit_counter)
+                act_sent[x][-1] += '{};'.format(hit_counter)
 
     return act_sent
 
 
-def annotate_sent(act_sent, termdict):
+def annotate_sent(act_sent, termdict, maxlen):
     """
     - a találat-számlálót 1-re állítja minden új mondat esetén
     - végigmegy a mondat tokenjein:
@@ -84,8 +88,11 @@ def annotate_sent(act_sent, termdict):
     hit_counter = 1
     all_tokens = len(act_sent)
 
+    if all_tokens < maxlen:
+        maxlen = all_tokens
+
     for i, token in enumerate(act_sent):
-        for r in range(1, all_tokens+1):
+        for r in range(i+1, min(maxlen+i, all_tokens+1)):
             ctoken = canonical(act_sent[i:r])
             if ctoken in termdict.keys():
                 act_sent = add_annotation(act_sent, i, r, hit_counter, ctoken, termdict)
@@ -105,11 +112,12 @@ def main():
     - kiírja a korpuszt
     """
 
-    eurovoc_dict = get_termdict('eurovoc.tsv')
+    eurovoc_dict, maxlen_eurovoc = get_termdict('eurovoc.tsv')
 
     reader = csv.reader(iter(sys.stdin.readline, ''), delimiter='\t', quoting=csv.QUOTE_NONE)
     header = next(reader)
     Line = namedtuple("Line", header)
+    header.append("term")
 
     sent = list()
 
@@ -118,7 +126,7 @@ def main():
         if line:
             sent.append([Line._make(line), '_'])
         else:
-            sent = annotate_sent(sent, eurovoc_dict)
+            sent = annotate_sent(sent, eurovoc_dict, maxlen_eurovoc)
             for token in sent:
                 print('\t'.join([field for field in token[0]]), '\t', token[1])
             sent = list()
