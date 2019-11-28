@@ -68,7 +68,8 @@ def add_annotation(act_sent, i, r, hit_counter, ctoken, termdict):
     if '@' in ctoken:
         for x, token in enumerate(act_sent):
             if i < x < r:
-                act_sent[x][-1] += '{};'.format(hit_counter)
+                # act_sent[x][-1] += '{};'.format(hit_counter)
+                act_sent[i][1] += '{};'.format(hit_counter)
 
     return act_sent
 
@@ -94,13 +95,16 @@ def annotate_sent(act_sent, termdict, maxlen):
 
     for i, token in enumerate(act_sent):
         for r in range(i+1, min(maxlen+i, all_tokens+1)):
+            print(r, i+1, min(maxlen+i, all_tokens+1))
+        # for r in range(1, all_tokens + 1):
             ctoken = canonical(act_sent[i:r])
+            print(ctoken)
             if ctoken in termdict.keys():
                 act_sent = add_annotation(act_sent, i, r, hit_counter, ctoken, termdict)
                 hit_counter += 1
 
-        act_sent[i][1] = act_sent[i][-1].rstrip(';')
-        act_sent[i][1] = re.sub(r'^_(.+)$', r'\1', act_sent[i][-1])
+        act_sent[i][1] = act_sent[i][1].rstrip(';')
+        act_sent[i][1] = re.sub(r'^_(.+)$', r'\1', act_sent[i][1])
 
     return act_sent
 
@@ -133,7 +137,8 @@ def main():
         else:
             sent = annotate_sent(sent, term_dict, maxlen)
             for token in sent:
-                print('\t'.join([field for field in token[0]]), '\t', token[1])
+                pass
+                # print('\t'.join([field for field in token[0]]), '\t', token[1])
             sent = list()
 
 
