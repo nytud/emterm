@@ -117,7 +117,7 @@ def main():
     parser.add_argument("-t", "--termlist", required=True, type=str, help="Add termlist!")
     args = parser.parse_args()
 
-    eurovoc_dict, maxlen_eurovoc = get_termdict(args.termlist)
+    term_dict, maxlen = get_termdict(args.termlist)
 
     reader = csv.reader(iter(sys.stdin.readline, ''), delimiter='\t', quoting=csv.QUOTE_NONE)
     header = next(reader)
@@ -131,7 +131,7 @@ def main():
         if line:
             sent.append([Line._make(line), '_'])
         else:
-            sent = annotate_sent(sent, eurovoc_dict, maxlen_eurovoc)
+            sent = annotate_sent(sent, term_dict, maxlen)
             for token in sent:
                 print('\t'.join([field for field in token[0]]), '\t', token[1])
             sent = list()
