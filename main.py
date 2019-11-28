@@ -10,6 +10,7 @@ import csv
 import re
 import sys
 from collections import namedtuple
+import argparse
 
 
 def get_termdict(path):
@@ -66,7 +67,7 @@ def add_annotation(act_sent, i, r, hit_counter, ctoken, termdict):
     act_sent[i][1] += '{}:{};'.format(hit_counter, '×'.join(termdict[ctoken]))
     if '@' in ctoken:
         for x, token in enumerate(act_sent):
-            if x > i and x < r:
+            if i < x < r:
                 act_sent[x][-1] += '{};'.format(hit_counter)
 
     return act_sent
@@ -112,7 +113,11 @@ def main():
     - kiírja a korpuszt
     """
 
-    eurovoc_dict, maxlen_eurovoc = get_termdict('eurovoc.tsv')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--termlist", required=True, type=str, help="Add termlist!")
+    args = parser.parse_args()
+
+    eurovoc_dict, maxlen_eurovoc = get_termdict(args.termlist)
 
     reader = csv.reader(iter(sys.stdin.readline, ''), delimiter='\t', quoting=csv.QUOTE_NONE)
     header = next(reader)
