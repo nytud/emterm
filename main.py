@@ -18,7 +18,7 @@ def get_termdict(path):
     - soronként beolvassa a term-öket vagy descriptorokat tartalmazó fájlt
     - a sorokat kettévágja ID-ra és elnevezésre, a felesleges space-eket törli
     - ha az elnevezés még nem szerepel kulcsként a dictionary-ben, akkor létrehozza ezt a kulcsot egy üres listával
-      FONTOS: azonos elnevezéshez több ID is tartozhat (legalább is az IATE esetében), ezért kell a lista!
+      FONTOS: azonos elnevezéshez több ID is tartozhat, ezért kell a lista!
     - a megfelelő kulcshoz hozzáadja az új ID-t
     """
 
@@ -64,12 +64,12 @@ def add_annotation(act_sent, i, r, hit_counter, ctoken, termdict):
     - többszavas találat esetén a maradék szavaknál jelzi, hogy ezek hányadik találatnak a részei
     """
     # TODO a × helyére mi kell? ez nem új találat, egyszerűen több ID tartozik ugyanahhoz a term-höz
-    act_sent[i][1] += '{}:{};'.format(hit_counter, '×'.join(termdict[ctoken]))
+    act_sent[i][1] = '{}:{};'.format(hit_counter, '×'.join(termdict[ctoken]))
     if '@' in ctoken:
+        print(ctoken)
         for x, token in enumerate(act_sent):
             if i < x < r:
-                # act_sent[x][-1] += '{};'.format(hit_counter)
-                act_sent[i][1] += '{};'.format(hit_counter)
+                act_sent[x][1] = '{};'.format(hit_counter)
 
     return act_sent
 
@@ -90,21 +90,14 @@ def annotate_sent(act_sent, termdict, maxlen):
     hit_counter = 1
     all_tokens = len(act_sent)
 
-    if all_tokens < maxlen:
-        maxlen = all_tokens
-
     for i, token in enumerate(act_sent):
-        for r in range(i+1, min(maxlen+i, all_tokens+1)):
-            print(r, i+1, min(maxlen+i, all_tokens+1))
-        # for r in range(1, all_tokens + 1):
+        for r in range(i+1, min(maxlen+i, all_tokens+1)+1):
             ctoken = canonical(act_sent[i:r])
-            print(ctoken)
             if ctoken in termdict.keys():
                 act_sent = add_annotation(act_sent, i, r, hit_counter, ctoken, termdict)
                 hit_counter += 1
 
         act_sent[i][1] = act_sent[i][1].rstrip(';')
-        act_sent[i][1] = re.sub(r'^_(.+)$', r'\1', act_sent[i][1])
 
     return act_sent
 
@@ -137,8 +130,7 @@ def main():
         else:
             sent = annotate_sent(sent, term_dict, maxlen)
             for token in sent:
-                pass
-                # print('\t'.join([field for field in token[0]]), '\t', token[1])
+                print('\t'.join([field for field in token[0]]), '\t', token[1])
             sent = list()
 
 
