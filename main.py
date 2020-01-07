@@ -125,6 +125,7 @@ def main():
 
     print('\t'.join(header))
     for line in reader:
+        print(len(line))
         if line:
             sent.append([Line._make(line), '_'])
         else:
