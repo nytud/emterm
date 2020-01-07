@@ -97,7 +97,7 @@ def annotate_sent(act_sent, termdict, maxlen):
                 act_sent = add_annotation(act_sent, i, r, hit_counter, ctoken, termdict)
                 hit_counter += 1
 
-        act_sent[i][1] = act_sent[i][1].rstrip(';').lstrip('_')
+        act_sent[i][1] = act_sent[i][1].rstrip(';')
 
     return act_sent
 
@@ -125,15 +125,19 @@ def main():
 
     print('\t'.join(header))
     for line in reader:
-        print(len(line))
         if line:
-            sent.append([Line._make(line), '_'])
+            sent.append([Line._make(line), ''])
         else:
             sent = annotate_sent(sent, term_dict, maxlen)
             for token in sent:
                 print('\t'.join([field for field in token[0]]), '\t', token[1])
             sent = list()
             print('')
+
+    if sent:
+        sent = annotate_sent(sent, term_dict, maxlen)
+        for token in sent:
+            print('\t'.join([field for field in token[0]]), '\t', token[1])
 
 
 if __name__ == "__main__":
