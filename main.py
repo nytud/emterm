@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     author: Ágnes Kalivoda, Noémi Vadász
-    last update: 2019.11.28.
+    last update: 2020.01.07.
 
 """
 
@@ -55,6 +55,7 @@ def canonical(ls):
             canonized_ls.append(item[0].lemma)
         else:
             canonized_ls.append(item[0].form)
+
     return '@'.join(canonized_ls)
 
 
@@ -64,9 +65,8 @@ def add_annotation(act_sent, i, r, hit_counter, ctoken, termdict):
     - többszavas találat esetén a maradék szavaknál jelzi, hogy ezek hányadik találatnak a részei
     """
     # TODO a × helyére mi kell? ez nem új találat, egyszerűen több ID tartozik ugyanahhoz a term-höz
-    act_sent[i][1] = '{}:{};'.format(hit_counter, '×'.join(termdict[ctoken]))
+    act_sent[i][1] += '{}:{};'.format(hit_counter, '×'.join(termdict[ctoken]))
     if '@' in ctoken:
-        print(ctoken)
         for x, token in enumerate(act_sent):
             if i < x < r:
                 act_sent[x][1] = '{};'.format(hit_counter)
@@ -97,7 +97,7 @@ def annotate_sent(act_sent, termdict, maxlen):
                 act_sent = add_annotation(act_sent, i, r, hit_counter, ctoken, termdict)
                 hit_counter += 1
 
-        act_sent[i][1] = act_sent[i][1].rstrip(';')
+        act_sent[i][1] = act_sent[i][1].rstrip(';').lstrip('_')
 
     return act_sent
 
@@ -123,7 +123,7 @@ def main():
 
     sent = list()
 
-    print(header)
+    print('\t'.join(header))
     for line in reader:
         if line:
             sent.append([Line._make(line), '_'])
@@ -132,6 +132,7 @@ def main():
             for token in sent:
                 print('\t'.join([field for field in token[0]]), '\t', token[1])
             sent = list()
+            print('')
 
 
 if __name__ == "__main__":
