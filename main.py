@@ -6,91 +6,7 @@
 
 """
 
-import csv
-import re
-import sys
-from collections import namedtuple, defaultdict
-import argparse
-
-
-def get_termdict(path):
-    """
-    - soronként beolvassa a term-öket vagy descriptorokat tartalmazó fájlt
-    - a sorokat kettévágja ID-ra és elnevezésre, a felesleges space-eket törli
-    - ha az elnevezés még nem szerepel kulcsként a dictionary-ben, akkor létrehozza ezt a kulcsot egy üres listával
-      FONTOS: azonos elnevezéshez több ID is tartozhat, ezért kell a lista!
-    - a megfelelő kulcshoz hozzáadja az új ID-t
-    """
-
-    termdict = defaultdict(list)
-    maxlen = 0
-
-    with open(path, encoding='UTF-8') as fr:
-        for line in fr:
-            uid, term = line.strip().split('\t', maxsplit=1)
-            uid = re.sub(r'\s+', '', uid)
-            term = re.sub(r'\s+', '', term)
-            termdict[term].append(uid)
-            actlen = len(term.split('@'))
-            maxlen = max(maxlen, actlen)
-
-    return termdict, maxlen
-
-
-def canonical(ls):
-    """
-    a token-szekvenciát olyan formájúra alakítja, hogy kereshető legyen a dictionary kulcsai között úgy, hogy:
-    - végigmegy egyesével a szekvencia tokenjein
-    - ha az utolsóhoz ér, annak a lemmáját őrzi meg
-    - ha egyéb token van soron, annak a formját őrzi meg
-    - az így létrejött szekvencia elemeit @-cal köti össze
-    """
-
-    canonized_ls = [item[0].form for item in ls[:-1]]
-    canonized_ls.append(ls[-1].lemma)
-
-    return '@'.join(canonized_ls)
-
-
-def add_annotation(act_sent, i, r, hit_counter, ctoken, termdict):
-    """
-    - beilleszti a részletes annotációt a találat első szavához (ha egyszavas a találat, akkor végzett is)
-    - többszavas találat esetén a maradék szavaknál jelzi, hogy ezek hányadik találatnak a részei
-    """
-
-    act_sent[i][1] += '{}:{};'.format(hit_counter, '×'.join(termdict[ctoken]))
-    for x, token in enumerate(act_sent[i+1:r], start=i+1):  # Ha i+1 == r, akkor nem többszavas -> nem csinál semmit
-        act_sent[x][1] = '{};'.format(hit_counter)
-
-    return act_sent
-
-
-def annotate_sent(act_sent, termdict, maxlen):
-    """
-    - a találat-számlálót 1-re állítja minden új mondat esetén
-    - végigmegy a mondat tokenjein:
-        - az aktuális tokentől kezdve végigveszi az összes token-szekvenciát, a mondat végével bezárólag, pl.
-          'süt a nap' -> 'süt', 'süt a', 'süt a nap'; 'a', 'a nap'; 'nap'
-        - minden token-szekvenciát átad egy függvénynek, ami a dictionary-nek megfelelő formátumban hozza ezeket
-        - ha az átalakított szekvencia megtalálható a dictionary kulcsai között:
-            - meghív egy függvényt, ami a pontos annotációt beilleszti a megfelelő oszlopba
-            - növeli eggyel a találat-számlálót
-    - végül elvégez pár formai igazítást az utolsó oszlopon
-    """
-
-    hit_counter = 1
-    all_tokens = len(act_sent)
-
-    for i, token in enumerate(act_sent):
-        for r in range(i+1, min(maxlen+i, all_tokens+1)+1):
-            ctoken = canonical(act_sent[i:r])
-            if ctoken in termdict.keys():
-                act_sent = add_annotation(act_sent, i, r, hit_counter, ctoken, termdict)
-                hit_counter += 1
-
-        act_sent[i][1] = act_sent[i][1].rstrip(';')
-
-    return act_sent
+from xtsv import build_pipeline
 
 
 def main():
@@ -101,34 +17,31 @@ def main():
     - kiírja a korpuszt
     """
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--termlist', required=True, type=str, help='Add termlist!')
-    args = parser.parse_args()
+    # Set input and output iterators...
+    input_iterator = open('teszt.xtsv', encoding='UTF-8')  # Or sys.stdin
+    output_iterator = open('teszt.out', 'w', encoding='UTF-8')  # Or sys.stdout
 
-    term_dict, maxlen = get_termdict(args.termlist)
+    # Set the tagger name as in the tools dictionary
+    used_tools = ['term']
+    presets = []
 
-    reader = csv.reader(iter(sys.stdin.readline, ''), delimiter='\t', quoting=csv.QUOTE_NONE)
-    header = next(reader)
-    Line = namedtuple('Line', header)
-    header.append('term')
+    # Init and run the module as it were in xtsv
 
-    sent = list()
+    # The relevant part of config.py
+    em_term = ('emterm', 'EmTerm', 'Mark multiword terminology expressions from fixed list',
+               ('termlist.tsv',), {'source_fields': {'form', 'lemma'}, 'target_fields': ['term']})
+    tools = [(em_term, ('term', 'emTerm'))]
 
-    print('\t'.join(header))
-    for line in reader:
-        if line:
-            sent.append([Line._make(line), ''])
-        else:
-            sent = annotate_sent(sent, term_dict, maxlen)
-            for token in sent:
-                print('\t'.join([field for field in token[0]]), '\t', token[1])
-            sent = list()
-            print('')
+    # Run the pipeline on input and write result to the output...
+    output_iterator.writelines(build_pipeline(input_iterator, used_tools, tools, presets))
 
-    if sent:
-        sent = annotate_sent(sent, term_dict, maxlen)
-        for token in sent:
-            print('\t'.join([field for field in token[0]]), '\t', token[1])
+    # TODO this method is recommended when debugging the tool
+    # Alternative: Run specific tool for input (still in emtsv format):
+    # output_iterator.writelines(process(input_iterator, inited_tools[used_tools[0]]))
+
+    # Alternative2: Run REST API debug server
+    # app = pipeline_rest_api('TEST', inited_tools, presets,  False)
+    # app.run()
 
 
 if __name__ == '__main__':
