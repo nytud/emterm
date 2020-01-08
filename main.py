@@ -9,7 +9,7 @@
 import csv
 import re
 import sys
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import argparse
 
 
@@ -22,20 +22,17 @@ def get_termdict(path):
     - a megfelelő kulcshoz hozzáadja az új ID-t
     """
 
-    termdict = {}
+    termdict = defaultdict(list)
     maxlen = 0
 
-    with open(path, encoding='utf-8') as fr:
+    with open(path, encoding='UTF-8') as fr:
         for line in fr:
-            uid, term = line.strip().split('\t')
+            uid, term = line.strip().split('\t', maxsplit=1)
             uid = re.sub(r'\s+', '', uid)
             term = re.sub(r'\s+', '', term)
-            if term not in termdict.keys():
-                termdict[term] = []
             termdict[term].append(uid)
             actlen = len(term.split('@'))
-            if maxlen < actlen:
-                maxlen = actlen
+            maxlen = max(maxlen, actlen)
 
     return termdict, maxlen
 
@@ -49,12 +46,8 @@ def canonical(ls):
     - az így létrejött szekvencia elemeit @-cal köti össze
     """
 
-    canonized_ls = []
-    for i, item in enumerate(ls):
-        if i == len(ls)-1:
-            canonized_ls.append(item[0].lemma)
-        else:
-            canonized_ls.append(item[0].form)
+    canonized_ls = [item[0].form for item in ls[:-1]]
+    canonized_ls.append(ls[-1].lemma)
 
     return '@'.join(canonized_ls)
 
@@ -64,12 +57,10 @@ def add_annotation(act_sent, i, r, hit_counter, ctoken, termdict):
     - beilleszti a részletes annotációt a találat első szavához (ha egyszavas a találat, akkor végzett is)
     - többszavas találat esetén a maradék szavaknál jelzi, hogy ezek hányadik találatnak a részei
     """
-    # TODO a × helyére mi kell? ez nem új találat, egyszerűen több ID tartozik ugyanahhoz a term-höz
+
     act_sent[i][1] += '{}:{};'.format(hit_counter, '×'.join(termdict[ctoken]))
-    if '@' in ctoken:
-        for x, token in enumerate(act_sent):
-            if i < x < r:
-                act_sent[x][1] = '{};'.format(hit_counter)
+    for x, token in enumerate(act_sent[i+1:r], start=i+1):  # Ha i+1 == r, akkor nem többszavas -> nem csinál semmit
+        act_sent[x][1] = '{};'.format(hit_counter)
 
     return act_sent
 
@@ -111,15 +102,15 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--termlist", required=True, type=str, help="Add termlist!")
+    parser.add_argument('-t', '--termlist', required=True, type=str, help='Add termlist!')
     args = parser.parse_args()
 
     term_dict, maxlen = get_termdict(args.termlist)
 
     reader = csv.reader(iter(sys.stdin.readline, ''), delimiter='\t', quoting=csv.QUOTE_NONE)
     header = next(reader)
-    Line = namedtuple("Line", header)
-    header.append("term")
+    Line = namedtuple('Line', header)
+    header.append('term')
 
     sent = list()
 
@@ -140,5 +131,5 @@ def main():
             print('\t'.join([field for field in token[0]]), '\t', token[1])
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
