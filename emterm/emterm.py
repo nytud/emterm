@@ -27,7 +27,7 @@ class EmTerm:
         self.target_fields = target_fields
 
     @staticmethod
-    def _get_termdict(path):
+    def _read_termdict(fr):
         """
         - soronként beolvassa a term-öket vagy descriptorokat tartalmazó fájlt
         - a sorokat kettévágja ID-ra és elnevezésre, a felesleges space-eket törli
@@ -38,15 +38,26 @@ class EmTerm:
 
         termdict = defaultdict(list)
         maxlen = 0
+        for line in fr:
+            uid, term = line.strip().split('\t', maxsplit=1)
+            uid = re.sub(r'\s+', '', uid)
+            term = re.sub(r'\s+', '', term)
+            termdict[term].append(uid)
+            actlen = len(term.split('@'))
+            maxlen = max(maxlen, actlen)
 
-        with open(path, encoding='UTF-8') as fr:
-            for line in fr:
-                uid, term = line.strip().split('\t', maxsplit=1)
-                uid = re.sub(r'\s+', '', uid)
-                term = re.sub(r'\s+', '', term)
-                termdict[term].append(uid)
-                actlen = len(term.split('@'))
-                maxlen = max(maxlen, actlen)
+        return termdict, maxlen
+
+    def _get_termdict(self, path):
+        """
+        Megnyitja a fájlt, vagy a megnyitott fájlt továbbítja beolvasásra
+        """
+
+        if isinstance(path, str):
+            with open(path, encoding='UTF-8') as fr:
+                termdict, maxlen = self._read_termdict(path)
+        else:
+            termdict, maxlen = self._read_termdict(path)
 
         return termdict, maxlen
 
