@@ -2,7 +2,7 @@
 
 example:
 
-    cat teszt.xtsv | python3 main.py --term-list termlist.tsv
-    cat teszt.xtsv | python3 main.py --term-list termlist.tsv -o kimenet.txt
-    python3 main.py --term-list termlist.tsv -i teszt.xtsv
-    python3 main.py --term-list termlist.tsv -i teszt.xtsv -o kimenet.txt
+    cat test_input.xtsv | python3 main.py --term-list test_termlist.tsv
+    cat test_input.xtsv | python3 main.py --term-list test_termlist.tsv -o test_output.txt
+    python3 main.py --term-list test_termlist.tsv -i test_input.xtsv
+    python3 main.py --term-list test_termlist.tsv -i test_input.xtsv -o test_output.txt
