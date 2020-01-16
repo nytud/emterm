@@ -5,12 +5,12 @@ __emTerm__ is an experimental module of the [e-magyar text processing system (em
 ## Usage
 
 1. __emTerm__ works with two input files:
-	- A POS-tagged text in xtsv format (a tsv file with headers, see `test_input.xtsv`).
-	- A simple predefined list of terms (see `test_termlist.tsv`). The list consists of two columns separated by tab characters: The first column contains the identifiers of the terms and the second contains the terms themselves. In the case of multi-word expressions, white spaces must be substituted for @ characters.
+    - A POS-tagged text in xtsv format (a tsv file with headers, see `test_input.xtsv`).
+    - A simple predefined list of terms (see `test_termlist.tsv`). The list consists of two columns separated by tab characters: The first column contains the identifiers of the terms and the second contains the terms themselves. In the case of multi-word expressions, white spaces must be substituted for @ characters.
 
 2. There are two ways to run __emTerm__:
-	- 1st: As a part of the emtsv pipeline (see the [emtsv documentation](https://github.com/dlt-rilmta/emtsv) for usage scenarios).
-	- 2nd: As a single tool, using the [xtsv framework](https://github.com/dlt-rilmta/xtsv). Below you can find four different ways of using __emTerm__ in the command line, independently of emtsv:
+    - 1st: As a part of the emtsv pipeline (see the [emtsv documentation](https://github.com/dlt-rilmta/emtsv) for usage scenarios).
+    - 2nd: As a single tool, using the [xtsv framework](https://github.com/dlt-rilmta/xtsv). Below you can find four different ways of using __emTerm__ in the command line, independently of emtsv:
 
 ```bash
     cat test_input.xtsv | python3 main.py --term-list test_termlist.tsv

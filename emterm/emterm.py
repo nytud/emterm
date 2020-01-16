@@ -55,7 +55,7 @@ class EmTerm:
 
         if isinstance(path, str):
             with open(path, encoding='UTF-8') as fr:
-                termdict, maxlen = self._read_termdict(path)
+                termdict, maxlen = self._read_termdict(fr)
         else:
             termdict, maxlen = self._read_termdict(path)
 

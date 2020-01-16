@@ -7,7 +7,7 @@
 """
 from argparse import FileType
 
-from xtsv.xtsv import build_pipeline, parser_skeleton
+from xtsv import build_pipeline, parser_skeleton
 
 
 def main():
@@ -17,7 +17,8 @@ def main():
     - a dictionary-t és a korpuszt átadja a korpusz-feldolgozó függvénynek
     - kiírja a korpuszt
     """
-    argparser = parser_skeleton(description='emTerm -- multiword terminology expressions marker')
+    argparser = parser_skeleton(description='emTerm - a module for marking single word and multi-word units '
+                                            'in POS-tagged text')
     argparser.add_argument('--term-list', dest='term_list', type=FileType(), required=True,
                            help='Specify the terminology dictionary file', metavar='FILE')
     opts = argparser.parse_args()
@@ -36,7 +37,7 @@ def main():
     # Init and run the module as it were in xtsv
 
     # The relevant part of config.py
-    em_term = ('emterm', 'EmTerm', 'Mark multiword terminology expressions from fixed list',
+    em_term = ('emterm', 'EmTerm', 'Mark single word and multi-word units in POS-tagged text',
                (opts.term_list,), {'source_fields': {'form', 'lemma'}, 'target_fields': ['term']})
     tools = [(em_term, ('term', 'emTerm'))]
 
