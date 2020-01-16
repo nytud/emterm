@@ -1,4 +1,4 @@
-# __emTerm__ -- a module for marking single word and multi-word units in POS-tagged text
+# __emTerm__ - a module for marking single word and multi-word units in POS-tagged text
 
 __emTerm__ is an experimental module of the [e-magyar text processing system (__emtsv__)](https://github.com/dlt-rilmta/emtsv). It can be used to find and mark single word or multi-word expressions (e.g. legal terms) in POS-tagged text. It can also be used independently of __emtsv__ by means of the [__xtsv__ framework](https://github.com/dlt-rilmta/xtsv).
 
