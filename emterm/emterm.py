@@ -41,7 +41,7 @@ class EmTerm:
         for line in fr:
             uid, term = line.strip().split('\t', maxsplit=1)
             uid = re.sub(r'\s+', '', uid)
-            term = re.sub(r'\s+', '', term)
+            term = re.sub(r'\s+', '', term).lower()
             termdict[term].append(uid)
             actlen = len(term.split('@'))
             maxlen = max(maxlen, actlen)
@@ -74,7 +74,7 @@ class EmTerm:
         canonized_ls = [item[field_indices[0]] for item in ls[:-1]]  # Form
         canonized_ls.append(ls[-1][field_indices[1]])  # Lemma
 
-        return '@'.join(canonized_ls)
+        return '@'.join(canonized_ls).lower()
 
     def _add_annotation(self, act_sent, i, r, hit_counter, ctoken, annotation_col):
         """
