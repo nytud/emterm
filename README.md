@@ -25,4 +25,17 @@ __emTerm__ is an experimental module of the [e-magyar text processing system (em
 
 __emTerm__ is licensed under the GPL 3.0 license.
 
-We are currently working on a paper which should be cited when __emTerm__ is used.
+Please, cite this article:
+
+```
+@inproceedings{emtsv3,
+    author = {Simon, Eszter and Indig, Balázs and Kalivoda, Ágnes and Mittelholcz, Iván and Sass, Bálint and Vadász, Noémi},
+    title = {Újabb fejlemények az e-magyar háza táján},
+    booktitle = {{XVI}. {M}agyar {S}zámítógépes {N}yelvészeti {K}onferencia ({MSZNY} 2020)},
+    editor = {Berend, Gábor and Gosztolya, Gábor and Vincze, Veronika},
+    pages = {29--42},
+    publisher = {Szegedi Tudományegyetem, TTIK, Informatikai Intézet},
+    address = {Szeged},
+    year = {2020}
+}
+```
