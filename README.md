@@ -13,10 +13,10 @@ __emTerm__ is an experimental module of the [e-magyar text processing system (em
     - 2nd: As a single tool, using the [xtsv framework](https://github.com/dlt-rilmta/xtsv). Below you can find four different ways of using __emTerm__ in the command line, independently of emtsv:
 
 ```bash
-    cat test_input.xtsv | python3 main.py --term-list test_termlist.tsv
-    cat test_input.xtsv | python3 main.py --term-list test_termlist.tsv -o test_output.xtsv
-    python3 main.py --term-list test_termlist.tsv -i test_input.xtsv
-    python3 main.py --term-list test_termlist.tsv -i test_input.xtsv -o test_output.xtsv
+    cat test_input.xtsv | python3 -m emterm --term-list test_termlist.tsv
+    cat test_input.xtsv | python3 -m emterm --term-list test_termlist.tsv -o test_output.xtsv
+    python3 -m emterm --term-list test_termlist.tsv -i test_input.xtsv
+    python3 -m emterm --term-list test_termlist.tsv -i test_input.xtsv -o test_output.xtsv
 ```
 
 3. The output of __emTerm__ keeps the xtsv format by adding a new column (`term`) to the end of the original, POS-tagged text. The annotation format used in this column is `serial_number_of_the_hit:identifier`. The numbering of hits starts with 1 at every new sentence. In the case of multi-word expressions, the whole annotation can be seen at the starting word, while the expression's further words get the same serial number as the first one but the identifier is not present. If a token can be found in several expressions, all of its hits are shown separated by semicolons (;).

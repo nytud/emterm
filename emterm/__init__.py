@@ -1,3 +1,7 @@
-from .emterm import EmTerm
+#!/usr/bin/env python3
+# -*- coding: utf-8, vim: expandtab:ts=4 -*-
 
-__all__ = ['EmTerm']
+from .emterm import EmTerm
+from .version import __version__
+
+__all__ = ['EmTerm', __version__]
