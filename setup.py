@@ -10,7 +10,7 @@ with open('README.md') as fh:
 setuptools.setup(
     name='emterm',
     version=__version__,
-    author='vadno',  # Will warn about missing e-mail
+    author='Kalivoda, Ágnes and Vadász, Noémi',  # Will warn about missing e-mail
     description='A module for marking single word and multi-word units in POS-tagged text',
     long_description=long_description,
     long_description_content_type='text/markdown',
