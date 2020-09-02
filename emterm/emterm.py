@@ -3,6 +3,7 @@
 """
     author: Ágnes Kalivoda, Noémi Vadász
     last update: 2020.01.07.
+    modified by Dávid Halász: 2020.09.01.
 
 """
 
@@ -82,6 +83,7 @@ class EmTerm:
         - többszavas találat esetén a maradék szavaknál jelzi, hogy ezek hányadik találatnak a részei
         """
 
+        act_sent[i][annotation_col] = act_sent[i][annotation_col].replace('_', '')  # new line by halaszd
         act_sent[i][annotation_col] += '{}:{};'.format(hit_counter, '×'.join(self._termdict[ctoken]))
         for x, token in enumerate(act_sent[i+1:r], start=i+1):  # Ha i+1 == r, akkor nem többszavas -> nem csinál semmit
             act_sent[x][annotation_col] = '{};'.format(hit_counter)
@@ -106,7 +108,7 @@ class EmTerm:
         annotation_col = -1
 
         for token in act_sent:  # Az új oszlop hozzáadása, hogy később már csak a tartalmát kelljen módosítani!
-            token.append('')  # .insert(-1, '')
+            token.append('_')  # token.append('')  # .insert(-1, '')  # modified by halaszd
 
         for i, token in enumerate(act_sent):
             for r in range(i+1, min(i+1+self._maxlen, all_tokens)):  # Fölülről korlátozza a mondat hossz!
