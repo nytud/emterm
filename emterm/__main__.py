@@ -21,6 +21,16 @@ def main():
                                             'in POS-tagged text')
     argparser.add_argument('--term-list', dest='term_list', type=FileType(), required=True,
                            help='Specify the terminology dictionary file', metavar='FILE')
+    argparser.add_argument('--counter-marker', dest='counter_marker', type=str, default=':',
+                           help='Specify counter marker separator (default: :)')
+    argparser.add_argument('--termid-separator', dest='termid_separator', type=str, default='×',
+                           help='Specify termid separator (default: ×)')
+    argparser.add_argument('--term-separator', dest='term_separator', type=str, default=';',
+                           help='Specify term separator (default: ;)')
+    argparser.add_argument('--list-mwe-separator', dest='list_mwe_separator', type=str, default='@',
+                           help='Specify list mwe separator (default: @)')
+    argparser.add_argument('--placeholder', dest='placeholder', type=str, default='_',
+                           help='Specify placeholder for empty fields (default: _)')
     opts = argparser.parse_args()
 
     # Set input and output iterators...
@@ -38,7 +48,9 @@ def main():
 
     # The relevant part of config.py
     em_term = ('emterm', 'EmTerm', 'Mark single word and multi-word units in POS-tagged text',
-               (opts.term_list,), {'source_fields': {'form', 'lemma'}, 'target_fields': ['term']})
+               (opts.term_list, opts.counter_marker, opts.termid_separator, opts.term_separator,
+                opts.list_mwe_separator, opts.placeholder), {'source_fields': {'form', 'lemma'},
+                                                             'target_fields': ['term']})
     tools = [(em_term, ('term', 'emTerm'))]
 
     # Run the pipeline on input and write result to the output...

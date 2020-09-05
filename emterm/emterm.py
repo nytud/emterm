@@ -8,13 +8,18 @@
 """
 
 
-import re
 from collections import defaultdict
 
 
 class EmTerm:
-    def __init__(self, termfile_path, source_fields=None, target_fields=None):
-        # Custom code goes here
+    def __init__(self, termfile_path, counter_marker=':', termid_separator='×', term_separator=';',
+                 list_mwe_separator='@', placeholder='_', source_fields=None, target_fields=None):
+        self._counter_marker = counter_marker
+        self._termid_separator = termid_separator
+        self._term_separator = term_separator
+        self._list_mwe_separator = list_mwe_separator
+        self._placeholder = placeholder
+
         self._termdict, self._maxlen = self._get_termdict(termfile_path)
 
         # Field names for xtsv (the code below is mandatory for an xtsv module)
@@ -27,8 +32,7 @@ class EmTerm:
         self.source_fields = source_fields
         self.target_fields = target_fields
 
-    @staticmethod
-    def _read_termdict(fr):
+    def _read_termdict(self, fr):
         """
         - soronként beolvassa a term-öket vagy descriptorokat tartalmazó fájlt
         - a sorokat kettévágja ID-ra és elnevezésre, a felesleges space-eket törli
@@ -41,11 +45,9 @@ class EmTerm:
         maxlen = 0
         for line in fr:
             uid, term = line.strip().split('\t', maxsplit=1)
-            uid = re.sub(r'\s+', '', uid)
-            term = re.sub(r'\s+', '', term).lower()
-            termdict[term].append(uid)
-            actlen = len(term.split('@'))
-            maxlen = max(maxlen, actlen)
+            term = tuple(term.strip().lower().split(self._list_mwe_separator))
+            termdict[term].append(uid.strip())
+            maxlen = max(maxlen, len(term))
 
         return termdict, maxlen
 
@@ -69,13 +71,13 @@ class EmTerm:
         - végigmegy egyesével a szekvencia tokenjein
         - ha az utolsóhoz ér, annak a lemmáját őrzi meg
         - ha egyéb token van soron, annak a formját őrzi meg
-        - az így létrejött szekvencia elemeit @-cal köti össze
+        - az így létrejött szekvencia elemeit tuple-be rakja
         """
 
-        canonized_ls = [item[field_indices[0]] for item in ls[:-1]]  # Form
-        canonized_ls.append(ls[-1][field_indices[1]])  # Lemma
+        canonized_ls = [item[field_indices[0]].lower() for item in ls[:-1]]  # Form
+        canonized_ls.append(ls[-1][field_indices[1]].lower())  # Lemma
 
-        return '@'.join(canonized_ls).lower()
+        return tuple(canonized_ls)
 
     def _add_annotation(self, act_sent, i, r, hit_counter, ctoken, annotation_col):
         """
@@ -83,9 +85,10 @@ class EmTerm:
         - többszavas találat esetén a maradék szavaknál jelzi, hogy ezek hányadik találatnak a részei
         """
 
-        act_sent[i][annotation_col] += '{}:{};'.format(hit_counter, '×'.join(self._termdict[ctoken]))
+        act_sent[i][annotation_col] += f'{hit_counter}{self._counter_marker}' \
+                                       f'{self._termid_separator.join(self._termdict[ctoken])}{self._term_separator}'
         for x, token in enumerate(act_sent[i+1:r], start=i+1):  # Ha i+1 == r, akkor nem többszavas -> nem csinál semmit
-            act_sent[x][annotation_col] = '{};'.format(hit_counter)
+            act_sent[x][annotation_col] = f'{hit_counter}{self._term_separator}'
 
         return act_sent
 
@@ -104,8 +107,8 @@ class EmTerm:
 
         hit_counter = 1
         all_tokens = len(act_sent)
-        annotation_col = -1
 
+        annotation_col = -1  # Az új oszlop sorszáma
         for token in act_sent:  # Az új oszlop hozzáadása, hogy később már csak a tartalmát kelljen módosítani!
             token.append('')
 
@@ -116,9 +119,9 @@ class EmTerm:
                     act_sent = self._add_annotation(act_sent, i, r, hit_counter, ctoken, annotation_col)
                     hit_counter += 1
 
-            act_sent[i][annotation_col] = act_sent[i][annotation_col].rstrip(';')
+            act_sent[i][annotation_col] = act_sent[i][annotation_col].rstrip(self._term_separator)
             if act_sent[i][annotation_col] == '':
-                act_sent[i][annotation_col] = '_'  # Replace empty string with placeholder
+                act_sent[i][annotation_col] = self._placeholder  # Replace empty string with placeholder
 
         return act_sent
 

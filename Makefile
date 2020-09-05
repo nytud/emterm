@@ -1,4 +1,9 @@
+# Bash is needed for time
+SHELL := /bin/bash -o pipefail
 DIR := ${CURDIR}
+red := $(shell tput setaf 1)
+green := $(shell tput setaf 2)
+sgr0 := $(shell tput sgr0)
 all:
 	@echo "See Makefile for possible targets!"
 
@@ -14,10 +19,11 @@ install-user: build
 
 test:
 	@echo "Running tests..."
-	cd /tmp && python3 -m emterm --term-list ${DIR}/test_termlist.tsv -i $(DIR)/tests/test_input.xtsv | diff - $(DIR)/tests/test_output.xtsv
+	time (cd /tmp && python3 -m emterm --term-list ${DIR}/test_termlist.tsv -i $(DIR)/tests/test_input.xtsv | \
+	 diff - $(DIR)/tests/test_output.xtsv 2>&1 | head -n100)
 
 install-user-test: install-user test
-	@echo "The test was completed successfully!"
+	@echo "$(green)The test was completed successfully!$(sgr0)"
 
 ci-test: install-user-test
 
