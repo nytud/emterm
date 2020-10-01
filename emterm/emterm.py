@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8, vim: expandtab:ts=4 -*-
 """
     author: Ágnes Kalivoda, Noémi Vadász
     last update: 2020.01.07.
