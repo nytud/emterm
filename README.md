@@ -20,7 +20,8 @@ __emTerm__ is an experimental module of the [e-magyar text processing system (em
     python3 -m emterm --term-list test_termlist.tsv -i test_input.xtsv --counter-marker VAL --termid-separator VAL --term-separator VAL --list-mwe-separator VAL --placeholder VAL
 ```
 
-3. The output of __emTerm__ keeps the xtsv format by adding a new column (`term`) to the end of the original, POS-tagged text. The annotation format used in this column is `serial_number_of_the_hit:identifier`. The numbering of hits starts with 1 at every new sentence. In the case of multi-word expressions, the whole annotation can be seen at the starting word, while the expression's further words get the same serial number as the first one but the identifier is not present. If a token can be found in several expressions, all of its hits are shown separated by semicolons (;).
+3. The output of __emTerm__ keeps the xtsv format by adding a new column (`term`) to the end of the original, POS-tagged text. The annotation format used in this column is `serial_number_of_the_hit:identifier`. The numbering of hits starts with 1 at every new sentence. In the case of multi-word expressions, the whole annotation can be seen at the starting word, while the expression's further words get the same serial number as the first one but the identifier is not present. If a token can be found in several expressions, all of its hits are shown separated by semicolons (`;`).\
+[__Detailed annotation format guide__](https://github.com/dlt-rilmta/emterm/blob/master/annotation.md) (in Hungarian).
 
 ## Citing and License
 
