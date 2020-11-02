@@ -7,7 +7,7 @@ sgr0 := $(shell tput sgr0)
 # DEP_COMMAND := "command"
 # DEP_FILE := "file"
 MODULE := "emterm"
-MODULE_PARAMS := ""
+MODULE_PARAMS := --term-list ${DIR}/test_termlist.tsv
 TEST_INPUT := "input.xtsv"
 TEST_OUTPUT := "output.xtsv"
 
